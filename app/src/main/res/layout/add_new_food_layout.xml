@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardElevation="4dp">
+
+    <LinearLayout
+        android:layout_margin="20dp"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/newFoodNameTextLayout"
+            android:layout_centerHorizontal="true">
+
+
+            <android.support.v7.widget.AppCompatEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/edtName"
+                android:hint="@string/name"
+                android:inputType="text"
+                android:drawablePadding="5dp"
+                android:textColor="@color/colorPrimaryDark"/>
+
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/newFoodDescriptionLayout"
+            android:layout_centerHorizontal="true">
+
+
+            <android.support.v7.widget.AppCompatEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/edtDescription"
+                android:hint="@string/description"
+                android:textSize="34sp"
+                android:inputType="textMultiLine"
+                android:drawablePadding="5dp"
+                android:textColor="@color/colorPrimaryDark"/>
+
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/newFoodPriceTextLayout"
+            android:layout_centerHorizontal="true">
+
+
+            <android.support.v7.widget.AppCompatEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/edtPrice"
+                android:hint="@string/price"
+                android:inputType="number"
+                android:drawablePadding="5dp"
+                android:textColor="@color/colorPrimaryDark"/>
+
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/newFoodDiscountTextLayout"
+            android:layout_centerHorizontal="true">
+
+
+            <android.support.v7.widget.AppCompatEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/edtDiscount"
+                android:hint="@string/discount"
+                android:inputType="number"
+                android:drawablePadding="5dp"
+                android:textColor="@color/colorPrimaryDark"/>
+
+        </android.support.design.widget.TextInputLayout>
+
+        <LinearLayout
+            android:weightSum="2"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <android.support.v7.widget.AppCompatButton
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:id="@+id/btnSelect"
+                android:text="@string/select"
+                style="@style/RaisedButton"/>
+
+            <android.support.v7.widget.AppCompatButton
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:id="@+id/btnUpload"
+                android:text="@string/upload"
+                style="@style/RaisedButtonUpload"/>
+
+        </LinearLayout>
+
+
+
+    </LinearLayout>
+</android.support.v7.widget.CardView>

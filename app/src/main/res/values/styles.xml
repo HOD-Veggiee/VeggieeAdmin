@@ -1,0 +1,30 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorBrown</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textColorHint">@color/colorPrimaryDark</item>
+    </style>
+
+    // Raise Button
+
+    <style name="RaisedButton" parent="Widget.AppCompat.Button.Colored">
+        <item name="android:backgroundTint">@color/colorRaisedButton</item>
+        <item name="android:textColor">@color/colorBrown</item>
+    </style>
+    <style name="RaisedButtonUpload" parent="Widget.AppCompat.Button.Colored">
+        <item name="android:backgroundTint">@color/colorBrown</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="colorPrimary">@color/colorBrown</item>
+        <item name="android:textColorPrimary">@color/colorPrimary</item>
+    </style>
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"></style>
+
+</resources>
