@@ -5,7 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".FoodListActivity"
-    android:background="@color/colorBrown"
     android:id="@+id/rootLayout">
 
     <android.support.v7.widget.RecyclerView
