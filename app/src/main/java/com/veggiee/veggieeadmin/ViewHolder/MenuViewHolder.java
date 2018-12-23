@@ -10,13 +10,14 @@ import android.widget.TextView;
 import com.veggiee.veggieeadmin.Common.Common;
 import com.veggiee.veggieeadmin.Interface.ItemClickListener;
 import com.veggiee.veggieeadmin.R;
+import com.veggiee.veggieeadmin.Utility.SquareImage;
 
 public class MenuViewHolder extends RecyclerView.ViewHolder implements
         View.OnClickListener,
         View.OnCreateContextMenuListener
 {
 
-    public ImageView categoryImage;
+    public SquareImage categoryImage;
         public TextView categoryName;
 
         public ItemClickListener itemClickListener;
@@ -25,7 +26,7 @@ public class MenuViewHolder extends RecyclerView.ViewHolder implements
         public MenuViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            categoryImage= (ImageView) itemView.findViewById(R.id.categoryImage);
+            categoryImage= (SquareImage) itemView.findViewById(R.id.categoryImage);
             categoryName=(TextView) itemView.findViewById(R.id.categoryName);
 
             itemView.setOnCreateContextMenuListener(this);

@@ -8,7 +8,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,7 +16,6 @@ import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -34,6 +32,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
@@ -42,18 +41,17 @@ import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 import com.veggiee.veggieeadmin.Common.Common;
 import com.veggiee.veggieeadmin.Interface.ItemClickListener;
-import com.veggiee.veggieeadmin.Model.Category;
 import com.veggiee.veggieeadmin.Model.Food;
+import com.veggiee.veggieeadmin.Model.SubCategory;
 import com.veggiee.veggieeadmin.ViewHolder.FoodViewHolder;
+import com.veggiee.veggieeadmin.ViewHolder.SubCategoryViewHolder;
 
 import java.util.UUID;
 
-import static android.text.TextUtils.isEmpty;
+public class SubCategoryActivity extends AppCompatActivity {
 
-public class FoodListActivity extends AppCompatActivity {
-
-    RecyclerView recycler_food;
-    TextView emptyFoodText;
+    RecyclerView recycler_sub_category;
+    TextView emptySubCategoryText;
     LinearLayoutManager mLayoutManager;
     FloatingActionButton fab;
 
@@ -62,39 +60,39 @@ public class FoodListActivity extends AppCompatActivity {
     // Firebase
 
     FirebaseDatabase db;
-    DatabaseReference foodList;
+    DatabaseReference subCategoryList;
     FirebaseStorage storage;
     StorageReference storageReference;
 
     String categoryId = "";
 
-    FirebaseRecyclerAdapter<Food, FoodViewHolder> adapter;
+    FirebaseRecyclerAdapter<SubCategory, SubCategoryViewHolder> adapter;
 
-    AppCompatEditText edtName, edtDescription, edtPrice, edtDiscount;
+    AppCompatEditText edtName;
     AppCompatButton btnSelect, btnUpload;
 
-    Food newFood;
+    SubCategory newSubCategory;
 
     Uri saveUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_food_list);
+        setContentView(R.layout.activity_sub_category);
 
         // Firebase
 
         db = FirebaseDatabase.getInstance();
-        foodList = db.getReference("Food");
+        subCategoryList = db.getReference("SubCategory");
         storage = FirebaseStorage.getInstance();
         storageReference = storage.getReference();
 
         // Init
 
-        recycler_food=(RecyclerView) findViewById(R.id.FoodListRecyclerView);
-        emptyFoodText = (TextView) findViewById(R.id.emptyFoodText);
+        recycler_sub_category=(RecyclerView) findViewById(R.id.SubCategoryListRecyclerView);
+        emptySubCategoryText = (TextView) findViewById(R.id.emptySubCategoryText);
         mLayoutManager=new LinearLayoutManager(this);
-        recycler_food.setLayoutManager(new GridLayoutManager(this,2));
+        recycler_sub_category.setLayoutManager(new GridLayoutManager(this,2));
 
         rootLayout = (RelativeLayout)findViewById(R.id.rootLayout);
 
@@ -102,30 +100,27 @@ public class FoodListActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showAddFoodDialog();
+                showAddSubCategoryDialog();
             }
         });
 
         if(getIntent() != null)
-            categoryId = getIntent().getStringExtra("subCategoryId");
+            categoryId = getIntent().getStringExtra("categoryId");
 
         if(!categoryId.isEmpty())
-            loadFoodList(categoryId);
+            loadSubCategoryList(categoryId);
     }
 
-    private void showAddFoodDialog() {
+    private void showAddSubCategoryDialog() {
 
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(FoodListActivity.this);
-        alertDialog.setTitle("Add new Food");
-        alertDialog.setMessage("Please enter new Food details!");
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(SubCategoryActivity.this);
+        alertDialog.setTitle("Add new Sub Category");
+        alertDialog.setMessage("Please enter new Sub Category details!");
 
         LayoutInflater layoutInflater = this.getLayoutInflater();
-        View add_menu_layout = layoutInflater.inflate(R.layout.add_new_food_layout, null);
+        View add_menu_layout = layoutInflater.inflate(R.layout.add_new_menu_layout, null);
 
         edtName = add_menu_layout.findViewById(R.id.edtName);
-        edtDescription = add_menu_layout.findViewById(R.id.edtDescription);
-        edtPrice = add_menu_layout.findViewById(R.id.edtPrice);
-        edtDiscount = add_menu_layout.findViewById(R.id.edtDiscount);
         btnSelect = add_menu_layout.findViewById(R.id.btnSelect);
         btnUpload = add_menu_layout.findViewById(R.id.btnUpload);
 
@@ -154,15 +149,15 @@ public class FoodListActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialogInterface, int i) {
                 dialogInterface.dismiss();
 
-                if(newFood != null)
+                if(newSubCategory != null)
                 {
-                    foodList.push().setValue(newFood);
+                    subCategoryList.push().setValue(newSubCategory);
 
-                    foodList.addListenerForSingleValueEvent(new ValueEventListener() {
+                    subCategoryList.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             if(dataSnapshot.hasChildren())
-                                emptyFoodText.setVisibility(View.GONE);
+                                emptySubCategoryText.setVisibility(View.GONE);
                         }
 
                         @Override
@@ -171,7 +166,7 @@ public class FoodListActivity extends AppCompatActivity {
                         }
                     });
 
-                    Snackbar.make(rootLayout, "New Food " + newFood.getName() + " was added", Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(rootLayout, "New Sub Category " + newSubCategory.getName() + " was added", Snackbar.LENGTH_SHORT).show();
                 }
             }
         });
@@ -189,49 +184,47 @@ public class FoodListActivity extends AppCompatActivity {
 
     }
 
-    private void loadFoodList(String categoryId) {
+    private void loadSubCategoryList(String categoryId) {
 
 
-        FirebaseRecyclerOptions<Food> options = new FirebaseRecyclerOptions.Builder<Food>()
-                .setQuery(foodList.orderByChild("menuId").equalTo(categoryId), Food.class).build();
+        FirebaseRecyclerOptions<SubCategory> options = new FirebaseRecyclerOptions.Builder<SubCategory>()
+                .setQuery(subCategoryList.orderByChild("categoryId").equalTo(categoryId), SubCategory.class).build();
 
         //getting data from Firebase
-        adapter=new FirebaseRecyclerAdapter<Food, FoodViewHolder>(options) {
+        adapter=new FirebaseRecyclerAdapter<SubCategory, SubCategoryViewHolder>(options) {
             @NonNull
             @Override
-            public FoodViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+            public SubCategoryViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
 
-                View view= LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.food_item,viewGroup,false);
-                return new FoodViewHolder(view);
+                View view= LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.sub_category_item,viewGroup,false);
+                return new SubCategoryViewHolder(view);
             }
 
             @Override
-            protected void onBindViewHolder(@NonNull FoodViewHolder holder, int position, @NonNull final Food model) {
-                holder.food_name.setText(model.getName());
-                Picasso.get().load(model.getImage()).into(holder.food_image);
+            protected void onBindViewHolder(@NonNull SubCategoryViewHolder holder, int position, @NonNull final SubCategory model) {
+                holder.sub_category_name.setText(model.getName());
+                Picasso.get().load(model.getImage()).into(holder.sub_category_image);
 
                 holder.setItemClickListener(new ItemClickListener() {
                     @Override
                     public void onClick(View view, int position, boolean isLongClick) {
 
-//                        Toast.makeText(getApplicationContext(),""+clickItem.getDescription(),Toast.LENGTH_SHORT).show();
-//
-//                        //get food item id and send it to food detail activity to get food detail of specific food
-//                        Intent foodListIntent=new Intent(FoodListActivity.this,FoodListActivity.class);
-//                        foodListIntent.putExtra("FoodItemId",adapter.getRef(position).getKey());
-//                        startActivity(foodListIntent);
+                        //get sub_category id and send it to foodlist activity to get foodlist of specific sub_category
+                        Intent foodListIntent=new Intent(SubCategoryActivity.this, FoodListActivity.class);
+                        foodListIntent.putExtra("subCategoryId",adapter.getRef(position).getKey());
+                        startActivity(foodListIntent);
                     }
                 });
             }
         };
 
-        recycler_food.setAdapter(adapter);
+        recycler_sub_category.setAdapter(adapter);
 
-        foodList.orderByChild("menuId").equalTo(categoryId).addListenerForSingleValueEvent(new ValueEventListener() {
+        subCategoryList.orderByChild("categoryId").equalTo(categoryId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if(dataSnapshot.hasChildren())
-                    emptyFoodText.setVisibility(View.GONE);
+                    emptySubCategoryText.setVisibility(View.GONE);
             }
 
             @Override
@@ -254,17 +247,14 @@ public class FoodListActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                     mDialog.dismiss();
-                    Toast.makeText(FoodListActivity.this, "Uploaded!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(SubCategoryActivity.this, "Uploaded!", Toast.LENGTH_LONG).show();
                     imageFolder.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                         @Override
                         public void onSuccess(Uri uri) {
-                            newFood = new Food();
-                            newFood.setName(edtName.getText().toString());
-                            newFood.setDescription(edtDescription.getText().toString());
-                            newFood.setPrice(edtPrice.getText().toString());
-                            newFood.setDiscount(edtDiscount.getText().toString());
-                            newFood.setMenuId(categoryId);
-                            newFood.setImage(uri.toString());
+                            newSubCategory = new SubCategory();
+                            newSubCategory.setName(edtName.getText().toString());
+                            newSubCategory.setCategoryId(categoryId);
+                            newSubCategory.setImage(uri.toString());
                         }
                     });
                 }
@@ -272,7 +262,7 @@ public class FoodListActivity extends AppCompatActivity {
                 @Override
                 public void onFailure(@NonNull Exception e) {
                     mDialog.dismiss();
-                    Toast.makeText(FoodListActivity.this, ""+e.getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(SubCategoryActivity.this, ""+e.getMessage(), Toast.LENGTH_LONG).show();
 
                 }
             }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
@@ -292,7 +282,7 @@ public class FoodListActivity extends AppCompatActivity {
         startActivityForResult(Intent.createChooser(intent, "Select Picture"), Common.PICK_IMAGE_REQUEST);
     }
 
-    private void changeImage(final Food item) {
+    private void changeImage(final SubCategory item) {
         if(saveUri != null)
         {
             final ProgressDialog mDialog = new ProgressDialog(this);
@@ -305,7 +295,7 @@ public class FoodListActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                     mDialog.dismiss();
-                    Toast.makeText(FoodListActivity.this, "Uploaded!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(SubCategoryActivity.this, "Uploaded!", Toast.LENGTH_LONG).show();
                     imageFolder.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                         @Override
                         public void onSuccess(Uri uri) {
@@ -318,7 +308,7 @@ public class FoodListActivity extends AppCompatActivity {
                 @Override
                 public void onFailure(@NonNull Exception e) {
                     mDialog.dismiss();
-                    Toast.makeText(FoodListActivity.this, ""+e.getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(SubCategoryActivity.this, ""+e.getMessage(), Toast.LENGTH_LONG).show();
 
                 }
             }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
@@ -359,38 +349,32 @@ public class FoodListActivity extends AppCompatActivity {
 
         if(item.getTitle().equals(Common.UPDATE))
         {
-            showUpdateFoodDialog(adapter.getRef(item.getOrder()).getKey(), adapter.getItem(item.getOrder()));
+            showUpdateSubCategoryDialog(adapter.getRef(item.getOrder()).getKey(), adapter.getItem(item.getOrder()));
         }
         else if(item.getTitle().equals(Common.DELETE))
         {
-            deleteFood(adapter.getRef(item.getOrder()).getKey());
+            deleteSubCategory(adapter.getRef(item.getOrder()).getKey());
         }
 
         return super.onContextItemSelected(item);
     }
 
-    private void showUpdateFoodDialog(final String key, final Food item) {
+    private void showUpdateSubCategoryDialog(final String key, final SubCategory item) {
 
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(FoodListActivity.this);
-        alertDialog.setTitle("Update new Food");
-        alertDialog.setMessage("Please enter Food details!");
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(SubCategoryActivity.this);
+        alertDialog.setTitle("Update new Sub Category");
+        alertDialog.setMessage("Please enter Sub Category details!");
 
         LayoutInflater layoutInflater = this.getLayoutInflater();
-        View add_menu_layout = layoutInflater.inflate(R.layout.add_new_food_layout, null);
+        View add_menu_layout = layoutInflater.inflate(R.layout.add_new_menu_layout, null);
 
         edtName = add_menu_layout.findViewById(R.id.edtName);
-        edtDescription = add_menu_layout.findViewById(R.id.edtDescription);
-        edtPrice = add_menu_layout.findViewById(R.id.edtPrice);
-        edtDiscount = add_menu_layout.findViewById(R.id.edtDiscount);
         btnSelect = add_menu_layout.findViewById(R.id.btnSelect);
         btnUpload = add_menu_layout.findViewById(R.id.btnUpload);
 
         // Set default values
 
         edtName.setText(item.getName());
-        edtDescription.setText(item.getDescription());
-        edtPrice.setText(item.getPrice());
-        edtDiscount.setText(item.getDiscount());
 
         // Event for Button
 
@@ -420,12 +404,10 @@ public class FoodListActivity extends AppCompatActivity {
                 // Update Information
 
                 item.setName(edtName.getText().toString());
-                item.setDescription(edtDescription.getText().toString());
-                item.setPrice(edtPrice.getText().toString());
-                item.setDiscount(edtDiscount.getText().toString());
 
-                foodList.child(key).setValue(item);
-                Snackbar.make(rootLayout, "Food " + item.getName() + " was updated", Snackbar.LENGTH_SHORT).show();
+                subCategoryList.child(key).setValue(item);
+
+                Snackbar.make(rootLayout, "Sub Category " + item.getName() + " was updated", Snackbar.LENGTH_SHORT).show();
             }
         });
 
@@ -441,14 +423,35 @@ public class FoodListActivity extends AppCompatActivity {
         alertDialog.show();
     }
 
-    private void deleteFood(String key) {
-        foodList.child(key).removeValue();
+    private void deleteSubCategory(String key) {
 
-        foodList.addListenerForSingleValueEvent(new ValueEventListener() {
+        // Get all foods in sub category
+        DatabaseReference foods = db.getReference("Food");
+
+        Query foodInCategory = foods.orderByChild("menuId").equalTo(key);
+
+        foodInCategory.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot postSnapshot:dataSnapshot.getChildren())
+                {
+                    postSnapshot.getRef().removeValue();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        subCategoryList.child(key).removeValue();
+
+        subCategoryList.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if(!dataSnapshot.hasChildren())
-                    emptyFoodText.setVisibility(View.VISIBLE);
+                    emptySubCategoryText.setVisibility(View.VISIBLE);
             }
 
             @Override
@@ -456,5 +459,7 @@ public class FoodListActivity extends AppCompatActivity {
 
             }
         });
+
+        Toast.makeText(SubCategoryActivity.this, "Sub Category Deleted !", Toast.LENGTH_LONG).show();
     }
 }

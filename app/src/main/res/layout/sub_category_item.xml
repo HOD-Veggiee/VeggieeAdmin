@@ -17,13 +17,13 @@
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
             android:src="@drawable/ic_orders"
-            android:id="@+id/food_Image"/>
+            android:id="@+id/sub_category_Image"/>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/food_name"
-            android:text="Name of food"
+            android:id="@+id/sub_category_name"
+            android:text="Name of Sub Category"
             android:textSize="23sp"
             android:layout_alignParentBottom="true"
             android:gravity="center"

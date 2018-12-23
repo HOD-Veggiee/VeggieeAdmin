@@ -73,6 +73,7 @@ public class LoginActivity extends AppCompatActivity {
                             Intent logIn = new Intent(LoginActivity.this, HomeActivity.class);
                             Common.currentStaff = staff;
                             startActivity(logIn);
+                            finish();
                             Toast.makeText(LoginActivity.this, "Login Successfully", Toast.LENGTH_LONG).show();
                         }
                         else

@@ -4,7 +4,6 @@ import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.ContextMenu;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.veggiee.veggieeadmin.Common.Common;
@@ -12,22 +11,22 @@ import com.veggiee.veggieeadmin.Interface.ItemClickListener;
 import com.veggiee.veggieeadmin.R;
 import com.veggiee.veggieeadmin.Utility.SquareImage;
 
-public class FoodViewHolder extends RecyclerView.ViewHolder implements
+public class SubCategoryViewHolder extends RecyclerView.ViewHolder implements
         View.OnClickListener,
         View.OnCreateContextMenuListener
 {
 
-    public SquareImage food_image;
-    public TextView food_name;
+    public SquareImage sub_category_image;
+    public TextView sub_category_name;
 
     public ItemClickListener itemClickListener;
 
 
-    public FoodViewHolder(@NonNull View itemView) {
+    public SubCategoryViewHolder(@NonNull View itemView) {
         super(itemView);
 
-        food_image= (SquareImage) itemView.findViewById(R.id.food_Image);
-        food_name=(TextView) itemView.findViewById(R.id.food_name);
+        sub_category_image = (SquareImage) itemView.findViewById(R.id.sub_category_Image);
+        sub_category_name = (TextView) itemView.findViewById(R.id.sub_category_name);
 
         itemView.setOnCreateContextMenuListener(this);
         itemView.setOnClickListener(this);

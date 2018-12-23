@@ -12,6 +12,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.AppCompatEditText;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -33,8 +34,14 @@ import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
@@ -43,6 +50,7 @@ import com.squareup.picasso.Picasso;
 import com.veggiee.veggieeadmin.Common.Common;
 import com.veggiee.veggieeadmin.Interface.ItemClickListener;
 import com.veggiee.veggieeadmin.Model.Category;
+import com.veggiee.veggieeadmin.Model.Token;
 import com.veggiee.veggieeadmin.ViewHolder.MenuViewHolder;
 
 import java.util.UUID;
@@ -60,6 +68,7 @@ public class HomeActivity extends AppCompatActivity
 
     // View
     RecyclerView recycler_menu;
+    TextView emptyCategoryText;
     LinearLayoutManager mLayoutManager;
 
     // Add new menu layout
@@ -115,12 +124,28 @@ public class HomeActivity extends AppCompatActivity
 
         // Init View
         recycler_menu=(RecyclerView) findViewById(R.id.categoriesRecyclerView);
+        emptyCategoryText = (TextView) findViewById(R.id.emptyCategoryText);
         //mRecyclerView.setHasFixedSize(true);
         mLayoutManager=new LinearLayoutManager(this);
-        recycler_menu.setLayoutManager(mLayoutManager);
+        recycler_menu.setLayoutManager(new GridLayoutManager(this,2));
 
         loadMenu();
 
+        // Send Token
+        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(HomeActivity.this, new OnSuccessListener<InstanceIdResult>() {
+            @Override
+            public void onSuccess(InstanceIdResult instanceIdResult) {
+                String token = instanceIdResult.getToken();
+                updateToken(token);
+            }
+        });
+    }
+
+    private void updateToken(String token) {
+        FirebaseDatabase db = FirebaseDatabase.getInstance();
+        DatabaseReference tokens = db.getReference("Tokens");
+        Token data = new Token(token, true); // bcz this is server side
+        tokens.child(Common.currentStaff.getPhone()).setValue(data);
     }
 
     private void showDialog() {
@@ -164,6 +189,20 @@ public class HomeActivity extends AppCompatActivity
                 if(newCategory != null)
                 {
                     category.push().setValue(newCategory);
+
+                    category.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if(dataSnapshot.hasChildren())
+                                emptyCategoryText.setVisibility(View.GONE);
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+
                     Snackbar.make(drawer, "New Category " + newCategory.getName() + " was added", Snackbar.LENGTH_SHORT).show();
                 }
             }
@@ -269,7 +308,7 @@ public class HomeActivity extends AppCompatActivity
                     public void onClick(View view, int position, boolean isLongClick) {
 
                         //get category id and send it to foodlist activity to get foodlist of specific category
-                        Intent foodListIntent=new Intent(HomeActivity.this, FoodListActivity.class);
+                        Intent foodListIntent=new Intent(HomeActivity.this, SubCategoryActivity.class);
                         foodListIntent.putExtra("categoryId",adapter.getRef(position).getKey());
                         startActivity(foodListIntent);
                     }
@@ -279,6 +318,19 @@ public class HomeActivity extends AppCompatActivity
         };
 
         recycler_menu.setAdapter(adapter);
+
+        category.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.hasChildren())
+                    emptyCategoryText.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
     }
 
@@ -360,8 +412,84 @@ public class HomeActivity extends AppCompatActivity
         return super.onContextItemSelected(item);
     }
 
-    private void deleteCategory(String key) {
+    private void deleteCategory(final String key) {
+
+        // Get all Sub categories and foods in category
+        DatabaseReference subCategories = db.getReference("SubCategory");
+        final DatabaseReference foods = db.getReference("Food");
+        final DatabaseReference rating = db.getReference("Rating");
+
+
+        Query subCategoriesInCategory = subCategories.orderByChild("categoryId").equalTo(key);
+
+        subCategoriesInCategory.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot postSnapshot:dataSnapshot.getChildren())
+                {
+                    String subCategoryKey = postSnapshot.getRef().getKey();
+
+                    Query foodInCategory = foods.orderByChild("menuId").equalTo(subCategoryKey);
+
+                    foodInCategory.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            for (DataSnapshot postSnapshot:dataSnapshot.getChildren())
+                            {
+//                                String ratingKey = postSnapshot.getRef().getKey();
+//
+//                                Query ratingOfFood = rating.orderByKey();
+//
+//                                ratingOfFood.orderByKey().equalTo(ratingKey).addListenerForSingleValueEvent(new ValueEventListener() {
+//                                    @Override
+//                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                                        for (DataSnapshot postSnapshot:dataSnapshot.getChildren())
+//                                        {
+//                                            postSnapshot.getRef().removeValue();
+//                                        }
+//                                    }
+//
+//                                    @Override
+//                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//                                    }
+//                                });
+
+                                postSnapshot.getRef().removeValue();
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+
+                    postSnapshot.getRef().removeValue();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
         category.child(key).removeValue();
+
+        category.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(!dataSnapshot.hasChildren())
+                    emptyCategoryText.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
         Toast.makeText(HomeActivity.this, "Item Deleted !", Toast.LENGTH_LONG).show();
     }
 
