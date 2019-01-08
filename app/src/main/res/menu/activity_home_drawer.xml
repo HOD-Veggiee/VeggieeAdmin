@@ -3,23 +3,54 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
-    <group android:checkableBehavior="single">
+    <group
+        android:id="@+id/orders"
+        android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_menu"
-            android:icon="@drawable/ic_menu"
-            android:title="@string/menu" />
-        <item
-            android:id="@+id/nav_cart"
-            android:icon="@drawable/ic_cart"
-            android:title="@string/cart" />
-        <item
-            android:id="@+id/nav_orders"
+            android:id="@+id/nav_pending_orders"
             android:icon="@drawable/ic_orders"
-            android:title="@string/orders" />
+            android:title="@string/pending_orders" />
+        <item
+            android:id="@+id/nav_preparing_orders"
+            android:icon="@drawable/ic_menu"
+            android:title="Preparing Orders" />
+        <item
+            android:id="@+id/nav_on_its_way_orders"
+            android:icon="@drawable/ic_local_shipping_black_24dp"
+            android:title="On it's way Orders" />
+        <item
+            android:id="@+id/nav_completed_orders"
+            android:icon="@drawable/ic_done_all_black_24dp"
+            android:title="Completed Orders" />
+        <item
+            android:id="@+id/nav_planners"
+            android:icon="@drawable/ic_event_available_black_24dp"
+            android:title="Planners" />
+    </group>
+
+    <group
+        android:id="@+id/settings"
+        android:checkableBehavior="none">
+
+        <item
+            android:id="@+id/nav_add_banners"
+            android:icon="@drawable/ic_image_black_24dp"
+            android:title="Add Banners"/>
+
+        <item
+            android:id="@+id/nav_add_staff"
+            android:icon="@drawable/ic_supervisor_account_black_24dp"
+            android:title="@string/add_staff"
+            android:visible="false"/>
+        <item
+            android:id="@+id/nav_update_password"
+            android:icon="@drawable/ic_lock_black_24dp"
+            android:title="Update Password" />
         <item
             android:id="@+id/nav_logout"
             android:icon="@drawable/ic_logout"
             android:title="@string/logout" />
+
     </group>
 
 </menu>

@@ -7,7 +7,11 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -16,7 +20,9 @@ import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,7 +54,9 @@ import com.veggiee.veggieeadmin.ViewHolder.SubCategoryViewHolder;
 
 import java.util.UUID;
 
-public class SubCategoryActivity extends AppCompatActivity {
+import io.paperdb.Paper;
+
+public class SubCategoryActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     RecyclerView recycler_sub_category;
     TextView emptySubCategoryText;
@@ -56,9 +64,11 @@ public class SubCategoryActivity extends AppCompatActivity {
     FloatingActionButton fab;
 
     RelativeLayout rootLayout;
+    NavigationView navigationView;
+    DrawerLayout drawer;
+    TextView txtFullName;
 
     // Firebase
-
     FirebaseDatabase db;
     DatabaseReference subCategoryList;
     FirebaseStorage storage;
@@ -80,6 +90,32 @@ public class SubCategoryActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sub_category);
 
+        // init Paper
+        Paper.init(this);
+
+        // Navigation
+        navigationView = findViewById(R.id.nav_view);
+        if (Common.currentStaff.getRoll().equals("admin"))
+            showItemAddStaff();
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setTitle(getIntent().getStringExtra("categoryName").toUpperCase());
+        setSupportActionBar(toolbar);
+
+        drawer = findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        navigationView.setNavigationItemSelectedListener(this);
+
+        // Set Name for Staff
+
+        View headerView = navigationView.getHeaderView(0);
+        txtFullName = headerView.findViewById(R.id.txtFullName);
+        txtFullName.setText(Common.currentStaff.getName());
+
+
         // Firebase
 
         db = FirebaseDatabase.getInstance();
@@ -89,14 +125,14 @@ public class SubCategoryActivity extends AppCompatActivity {
 
         // Init
 
-        recycler_sub_category=(RecyclerView) findViewById(R.id.SubCategoryListRecyclerView);
-        emptySubCategoryText = (TextView) findViewById(R.id.emptySubCategoryText);
+        recycler_sub_category= findViewById(R.id.SubCategoryListRecyclerView);
+        emptySubCategoryText = findViewById(R.id.emptySubCategoryText);
         mLayoutManager=new LinearLayoutManager(this);
         recycler_sub_category.setLayoutManager(new GridLayoutManager(this,2));
 
-        rootLayout = (RelativeLayout)findViewById(R.id.rootLayout);
+        rootLayout = findViewById(R.id.rootLayout);
 
-        fab = (FloatingActionButton)findViewById(R.id.fab);
+        fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -212,6 +248,7 @@ public class SubCategoryActivity extends AppCompatActivity {
                         //get sub_category id and send it to foodlist activity to get foodlist of specific sub_category
                         Intent foodListIntent=new Intent(SubCategoryActivity.this, FoodListActivity.class);
                         foodListIntent.putExtra("subCategoryId",adapter.getRef(position).getKey());
+                        foodListIntent.putExtra("subCategoryName",adapter.getItem(position).getName());
                         startActivity(foodListIntent);
                     }
                 });
@@ -461,5 +498,99 @@ public class SubCategoryActivity extends AppCompatActivity {
         });
 
         Toast.makeText(SubCategoryActivity.this, "Sub Category Deleted !", Toast.LENGTH_LONG).show();
+    }
+
+
+    // Navigation
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.home, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        Intent orders = new Intent(SubCategoryActivity.this, OrderStatusActivity.class);
+
+        switch (id)
+        {
+            case R.id.nav_pending_orders:
+                orders.putExtra("order_status_id", "0");
+                startActivity(orders);
+                break;
+            case R.id.nav_preparing_orders:
+                orders.putExtra("order_status_id", "1");
+                startActivity(orders);
+                break;
+            case R.id.nav_on_its_way_orders:
+                orders.putExtra("order_status_id", "2");
+                startActivity(orders);
+                break;
+            case R.id.nav_completed_orders:
+                orders.putExtra("order_status_id", "3");
+                startActivity(orders);
+                break;
+            case R.id.nav_planners:
+                Intent plannerIntent=new Intent(SubCategoryActivity.this,PlannerActivity.class);
+                startActivity(plannerIntent);
+                break;
+            case R.id.nav_add_banners:
+                Intent addBannerIntent=new Intent(SubCategoryActivity.this, AddBannerActivity.class);
+                startActivity(addBannerIntent);
+                break;
+            case R.id.nav_add_staff:
+                Intent addStaffIntent=new Intent(SubCategoryActivity.this, StaffActivity.class);
+                startActivity(addStaffIntent);
+                break;
+            case R.id.nav_logout:
+                // Delete Remember user
+                Paper.book().destroy();
+
+                Intent loginIntent=new Intent(SubCategoryActivity.this,LoginActivity.class);
+                loginIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(loginIntent);
+                finish();
+                break;
+        }
+
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+    private void showItemAddStaff()
+    {
+        Menu nav_Menu = navigationView.getMenu();
+        nav_Menu.findItem(R.id.nav_add_staff).setVisible(true);
     }
 }

@@ -79,14 +79,18 @@ public class OrderStatusActivity extends AppCompatActivity {
         //init firebase
         mDatabase=FirebaseDatabase.getInstance();
         requests=mDatabase.getReference("Request");
+
+        String order_status_id = "";
+        if(getIntent() != null)
+            order_status_id = getIntent().getStringExtra("order_status_id");
         
-        loadOrders();        
+        loadOrders(order_status_id);
     }
 
-    private void loadOrders() {
+    private void loadOrders(String order_status_id) {
 
         FirebaseRecyclerOptions<Request> options=new FirebaseRecyclerOptions.Builder<Request>()
-                .setQuery(requests,Request.class).build();
+                .setQuery(requests.orderByChild("status").equalTo(order_status_id),Request.class).build();
 
 
         adapter=new FirebaseRecyclerAdapter<Request, OrderViewHolder>(options) {
@@ -163,7 +167,7 @@ public class OrderStatusActivity extends AppCompatActivity {
 
         mRecyclerView.setAdapter(adapter);
 
-        requests.addListenerForSingleValueEvent(new ValueEventListener() {
+        requests.orderByChild("status").equalTo(order_status_id).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if(dataSnapshot.hasChildren())
@@ -221,17 +225,21 @@ public class OrderStatusActivity extends AppCompatActivity {
         final View view = inflater.inflate(R.layout.update_order_layout, null);
 
         spinner = (MaterialSpinner) view.findViewById(R.id.statusSpinner);
-        spinner.setItems("Order placed.", "In Process.", "On way.");
+        spinner.setItems("Pending", "Preparing", "On it's way", "Completed");
 
         alertDialog.setView(view);
 
         final String localKey = key;
 
-        alertDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+        alertDialog.setPositiveButton("Update", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 dialogInterface.dismiss();
                 item.setStatus(String.valueOf(spinner.getSelectedIndex()));
+                if(spinner.getSelectedIndex() == 3)
+                    item.setPhone_status(item.getPhone() + "_completed");
+                else
+                    item.setPhone_status(item.getPhone() + "_incomplete");
 
                 requests.child(localKey).setValue(item);
 
@@ -239,7 +247,7 @@ public class OrderStatusActivity extends AppCompatActivity {
             }
         });
 
-        alertDialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+        alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 dialogInterface.dismiss();

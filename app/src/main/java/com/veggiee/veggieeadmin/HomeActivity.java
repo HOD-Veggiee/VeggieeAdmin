@@ -50,10 +50,13 @@ import com.squareup.picasso.Picasso;
 import com.veggiee.veggieeadmin.Common.Common;
 import com.veggiee.veggieeadmin.Interface.ItemClickListener;
 import com.veggiee.veggieeadmin.Model.Category;
+import com.veggiee.veggieeadmin.Model.Staff;
 import com.veggiee.veggieeadmin.Model.Token;
 import com.veggiee.veggieeadmin.ViewHolder.MenuViewHolder;
 
 import java.util.UUID;
+
+import io.paperdb.Paper;
 
 public class HomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -62,7 +65,7 @@ public class HomeActivity extends AppCompatActivity
 
     // Firebase
     FirebaseDatabase db;
-    DatabaseReference category;
+    DatabaseReference category, staff;
     FirebaseStorage storage;
     StorageReference storageReference;
 
@@ -70,6 +73,7 @@ public class HomeActivity extends AppCompatActivity
     RecyclerView recycler_menu;
     TextView emptyCategoryText;
     LinearLayoutManager mLayoutManager;
+    NavigationView navigationView;
 
     // Add new menu layout
     AppCompatEditText edtName;
@@ -87,9 +91,16 @@ public class HomeActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle("Menu Management");
         setSupportActionBar(toolbar);
+
+        // init Paper
+        Paper.init(this);
+
+        navigationView = findViewById(R.id.nav_view);
+        if (Common.currentStaff.getRoll().equals("admin"))
+            showItemAddStaff();
 
         // Init Firebase
 
@@ -107,24 +118,23 @@ public class HomeActivity extends AppCompatActivity
             }
         });
 
-        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         // Set Name for Staff
 
         View headerView = navigationView.getHeaderView(0);
-        txtFullName = (TextView)headerView.findViewById(R.id.txtFullName);
+        txtFullName = headerView.findViewById(R.id.txtFullName);
         txtFullName.setText(Common.currentStaff.getName());
 
         // Init View
-        recycler_menu=(RecyclerView) findViewById(R.id.categoriesRecyclerView);
-        emptyCategoryText = (TextView) findViewById(R.id.emptyCategoryText);
+        recycler_menu= findViewById(R.id.categoriesRecyclerView);
+        emptyCategoryText = findViewById(R.id.emptyCategoryText);
         //mRecyclerView.setHasFixedSize(true);
         mLayoutManager=new LinearLayoutManager(this);
         recycler_menu.setLayoutManager(new GridLayoutManager(this,2));
@@ -308,9 +318,10 @@ public class HomeActivity extends AppCompatActivity
                     public void onClick(View view, int position, boolean isLongClick) {
 
                         //get category id and send it to foodlist activity to get foodlist of specific category
-                        Intent foodListIntent=new Intent(HomeActivity.this, SubCategoryActivity.class);
-                        foodListIntent.putExtra("categoryId",adapter.getRef(position).getKey());
-                        startActivity(foodListIntent);
+                        Intent subCategoryIntent=new Intent(HomeActivity.this, SubCategoryActivity.class);
+                        subCategoryIntent.putExtra("categoryId",adapter.getRef(position).getKey());
+                        subCategoryIntent.putExtra("categoryName",adapter.getItem(position).getName());
+                        startActivity(subCategoryIntent);
                     }
                 });
 
@@ -384,12 +395,52 @@ public class HomeActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_orders)
-        {
-            Intent orders = new Intent(HomeActivity.this, OrderStatusActivity.class);
-            startActivity(orders);
-        }
+        Intent orders = new Intent(HomeActivity.this, OrderStatusActivity.class);
 
+        switch (id)
+        {
+            case R.id.nav_pending_orders:
+                orders.putExtra("order_status_id", "0");
+                startActivity(orders);
+                break;
+            case R.id.nav_preparing_orders:
+                orders.putExtra("order_status_id", "1");
+                startActivity(orders);
+                break;
+            case R.id.nav_on_its_way_orders:
+                orders.putExtra("order_status_id", "2");
+                startActivity(orders);
+                break;
+            case R.id.nav_completed_orders:
+                orders.putExtra("order_status_id", "3");
+                startActivity(orders);
+                break;
+            case R.id.nav_planners:
+                Intent plannerIntent=new Intent(HomeActivity.this,PlannerActivity.class);
+                startActivity(plannerIntent);
+                break;
+            case R.id.nav_add_banners:
+                Intent addBannerIntent=new Intent(HomeActivity.this, AddBannerActivity.class);
+                startActivity(addBannerIntent);
+                break;
+            case R.id.nav_add_staff:
+                Intent addStaffIntent=new Intent(HomeActivity.this, StaffActivity.class);
+                startActivity(addStaffIntent);
+                break;
+            case R.id.nav_update_password:
+                Intent updatePasswordIntent=new Intent(HomeActivity.this, UpdatePasswordActivity.class);
+                startActivity(updatePasswordIntent);
+                break;
+            case R.id.nav_logout:
+                // Delete Remember user
+                Paper.book().destroy();
+
+                Intent loginIntent=new Intent(HomeActivity.this,LoginActivity.class);
+                loginIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(loginIntent);
+                finish();
+                break;
+        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
@@ -587,5 +638,11 @@ public class HomeActivity extends AppCompatActivity
                 }
             });
         }
+    }
+
+    private void showItemAddStaff()
+    {
+        Menu nav_Menu = navigationView.getMenu();
+        nav_Menu.findItem(R.id.nav_add_staff).setVisible(true);
     }
 }

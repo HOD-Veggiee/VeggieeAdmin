@@ -4,12 +4,14 @@ public class Staff {
 
     private String Name, Password, Phone, Roll;
 
-    public Staff(String name, String password) {
-        Name = name;
-        Password = password;
+    public Staff() {
     }
 
-    public Staff() {
+    public Staff(String name, String password, String phone, String roll) {
+        Name = name;
+        Password = password;
+        Phone = phone;
+        Roll = roll;
     }
 
     public String getName() {

@@ -57,6 +57,11 @@ dependencies {
     // Add Library
     implementation 'com.android.support:design:28.0.0'
     implementation 'com.jaredrummler:material-spinner:1.3.0'
+
+    // Paper storage for writing key-value to android memory
+    implementation 'io.paperdb:paperdb:2.6'
+    // Checkbox
+    implementation 'com.github.rey5137:material:1.2.5'
 }
 
 apply plugin: 'com.google.gms.google-services'

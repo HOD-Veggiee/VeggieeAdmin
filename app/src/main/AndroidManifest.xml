@@ -34,7 +34,11 @@
             android:theme="@style/AppTheme" />
         <activity android:name=".FoodListActivity" />
         <activity android:name=".OrderStatusActivity" />
-        <activity android:name=".SubCategoryActivity"></activity>
+        <activity android:name=".SubCategoryActivity" />
+        <activity android:name=".StaffActivity" />
+        <activity android:name=".UpdatePasswordActivity" />
+        <activity android:name=".PlannerActivity" />
+        <activity android:name=".AddBannerActivity"></activity>
     </application>
 
 </manifest>

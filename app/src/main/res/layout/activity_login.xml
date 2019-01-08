@@ -18,6 +18,7 @@
         android:src="@drawable/logo"/>
 
     <android.support.design.widget.TextInputLayout
+        android:layout_margin="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/phoneTextLayout"
@@ -38,6 +39,7 @@
     </android.support.design.widget.TextInputLayout>
 
     <android.support.design.widget.TextInputLayout
+        android:layout_margin="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/passwordTextLayout"
@@ -56,12 +58,26 @@
 
     </android.support.design.widget.TextInputLayout>
 
+    <com.rey.material.widget.CheckBox
+        android:layout_margin="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/passwordTextLayout"
+        android:id="@+id/checkBoxRemember"
+        style="@style/Material.Drawable.CheckBox"
+        android:text="Remember me"
+        android:gravity="center_vertical"
+        android:textColor="@android:color/white"
+        app:cbd_strokeColor="@color/primary_text"
+        app:cbd_tickColor="@color/colorPrimaryDark"/>
+
     <android.support.v7.widget.AppCompatButton
+        android:layout_margin="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/loginButton"
         android:text="@string/login"
-        android:layout_below="@id/passwordTextLayout"
+        android:layout_below="@id/checkBoxRemember"
         style="@style/RaisedButton"/>
 
 </RelativeLayout>

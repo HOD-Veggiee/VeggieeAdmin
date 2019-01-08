@@ -23,4 +23,11 @@
     <string name="discount">Discount</string>
     <string name="channel_name">New Order</string>
     <string name="channel_description">Arrival of new order</string>
+    <string name="pending_orders">Pending Orders</string>
+    <string name="add_staff">Add Staff</string>
+    <string name="register">Register</string>
+    <string name="register_staff_name">Name</string>
+    <string name="enter_current_password">Enter Current Password</string>
+    <string name="enter_new_password">Enter New Password</string>
+    <string name="update">Update</string>
 </resources>
